@@ -51,6 +51,7 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  files         FileUpload[]
 
   @@map("users")
 }
@@ -62,4 +63,18 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verification_tokens")
+}
+
+model FileUpload {
+  id        String   @id @default(cuid())
+  filename  String
+  fileUrl   String
+  fileType  String
+  fileSize  Int
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("file_uploads")
 }

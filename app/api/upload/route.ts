@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
+import { prisma } from "@/prisma/client";
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION!,
@@ -15,7 +16,7 @@ export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session) {
+    if (!session?.user?.email) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const key = `${session.user?.email}/${Date.now()}-${file.name}`;
+    const key = `${session.user.email}/${Date.now()}-${file.name}`;
 
     const command = new PutObjectCommand({
       Bucket: process.env.AWS_BUCKET_NAME!,
@@ -46,7 +47,33 @@ export async function POST(request: Request) {
 
     const fileUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
 
-    return NextResponse.json({ url: fileUrl });
+    // Get the user from the database
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    // Save file information to the database
+    const fileUpload = await prisma.fileUpload.create({
+      data: {
+        filename: file.name,
+        fileUrl: fileUrl,
+        fileType: file.type,
+        fileSize: file.size,
+        userId: user.id,
+      },
+    });
+
+    return NextResponse.json({ 
+      url: fileUrl,
+      fileInfo: fileUpload 
+    });
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json(
