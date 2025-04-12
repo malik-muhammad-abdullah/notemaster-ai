@@ -17,6 +17,7 @@ export default function FileUploadPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<string>("");
   const [userFiles, setUserFiles] = useState<FileUpload[]>([]);
+  const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
   const { data: session } = useSession();
 
   useEffect(() => {
@@ -72,6 +73,31 @@ export default function FileUploadPage() {
       console.error("Upload error:", error);
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleDelete = async (fileId: string) => {
+    if (!confirm("Are you sure you want to delete this file?")) {
+      return;
+    }
+
+    try {
+      setDeletingFileId(fileId);
+      const response = await fetch(`/api/files/${fileId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Delete failed");
+      }
+
+      // Remove the file from the local state
+      setUserFiles(userFiles.filter(file => file.id !== fileId));
+    } catch (error) {
+      console.error("Delete error:", error);
+      alert("Failed to delete file. Please try again.");
+    } finally {
+      setDeletingFileId(null);
     }
   };
 
@@ -174,7 +200,7 @@ export default function FileUploadPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {new Date(file.createdAt).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 space-x-2">
                         <a
                           href={file.fileUrl}
                           target="_blank"
@@ -183,6 +209,15 @@ export default function FileUploadPage() {
                         >
                           View
                         </a>
+                        <button
+                          onClick={() => handleDelete(file.id)}
+                          disabled={deletingFileId === file.id}
+                          className={`text-red-500 hover:text-red-700 ${
+                            deletingFileId === file.id ? "opacity-50 cursor-not-allowed" : ""
+                          }`}
+                        >
+                          {deletingFileId === file.id ? "Deleting..." : "Delete"}
+                        </button>
                       </td>
                     </tr>
                   ))}
