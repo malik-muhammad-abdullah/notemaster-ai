@@ -12,6 +12,17 @@ interface FileUpload {
   createdAt: string;
 }
 
+const ALLOWED_FILE_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'text/plain'
+];
+
+const ALLOWED_FILE_EXTENSIONS = ['.pdf', '.doc', '.docx', '.ppt', '.pptx', '.txt'];
+
 export default function FileUploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -38,15 +49,39 @@ export default function FileUploadPage() {
     }
   };
 
+  const validateFile = (file: File): string | null => {
+    if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+      return `File type not allowed. Allowed types: ${ALLOWED_FILE_EXTENSIONS.join(', ')}`;
+    }
+    return null;
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      const error = validateFile(selectedFile);
+      
+      if (error) {
+        setUploadStatus(error);
+        e.target.value = ''; // Clear the file input
+        setFile(null);
+        return;
+      }
+      
+      setFile(selectedFile);
+      setUploadStatus("");
     }
   };
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return;
+
+    const error = validateFile(file);
+    if (error) {
+      setUploadStatus(error);
+      return;
+    }
 
     try {
       setUploading(true);
@@ -61,7 +96,8 @@ export default function FileUploadPage() {
       });
 
       if (!response.ok) {
-        throw new Error("Upload failed");
+        const data = await response.json();
+        throw new Error(data.error || "Upload failed");
       }
 
       const data = await response.json();
@@ -69,7 +105,7 @@ export default function FileUploadPage() {
       setFile(null);
       fetchUserFiles(); // Refresh the file list
     } catch (error) {
-      setUploadStatus("Upload failed. Please try again.");
+      setUploadStatus(error instanceof Error ? error.message : "Upload failed. Please try again.");
       console.error("Upload error:", error);
     } finally {
       setUploading(false);
@@ -130,7 +166,11 @@ export default function FileUploadPage() {
                 onChange={handleFileChange}
                 className="w-full"
                 disabled={uploading}
+                accept={ALLOWED_FILE_EXTENSIONS.join(',')}
               />
+              <p className="mt-2 text-sm text-gray-500">
+                Allowed file types: {ALLOWED_FILE_EXTENSIONS.join(', ')}
+              </p>
             </div>
 
             {file && (
@@ -153,7 +193,11 @@ export default function FileUploadPage() {
           </form>
 
           {uploadStatus && (
-            <div className="mt-4 p-4 rounded-md bg-gray-100 dark:bg-gray-700">
+            <div className={`mt-4 p-4 rounded-md ${
+              uploadStatus.includes("successful") 
+                ? "bg-green-100 dark:bg-green-900" 
+                : "bg-gray-100 dark:bg-gray-700"
+            }`}>
               <p className="text-sm">{uploadStatus}</p>
             </div>
           )}
