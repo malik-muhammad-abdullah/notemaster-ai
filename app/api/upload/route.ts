@@ -3,6 +3,7 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { prisma } from "@/prisma/client";
+import { processDocument } from "@/lib/document-processor";
 
 const ALLOWED_FILE_TYPES = [
   'application/pdf',
@@ -87,9 +88,18 @@ export async function POST(request: Request) {
       },
     });
 
+    // Process the document for AI ingestion
+    const processingResult = await processDocument(
+      buffer,
+      file.name,
+      file.type,
+      user.id
+    );
+
     return NextResponse.json({ 
       url: fileUrl,
-      fileInfo: fileUpload 
+      fileInfo: fileUpload,
+      processing: processingResult
     });
   } catch (error) {
     console.error("Upload error:", error);
