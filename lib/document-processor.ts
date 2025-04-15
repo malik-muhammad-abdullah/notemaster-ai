@@ -4,6 +4,7 @@ import { OpenAIEmbeddings } from "@langchain/openai";
 import { getPineconeIndex } from "./vectorstore";
 import { Document } from "@langchain/core/documents";
 import { PineconeStore } from "@langchain/pinecone";
+import mammoth from "mammoth";
 
 if (!process.env.OPENAI_API_KEY) {
   throw new Error("OPENAI_API_KEY is not set in environment variables");
@@ -25,14 +26,8 @@ export async function processDocument(
       const blob = new Blob([fileBuffer], { type: "application/pdf" });
       const loader = new WebPDFLoader(blob);
       docs = await loader.load();
-    } else if (
-      fileType === "text/plain" ||
-      fileType === "application/msword" ||
-      fileType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-      fileType === "application/vnd.ms-powerpoint" ||
-      fileType === "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-    ) {
-      // For text-based files, just use the raw text
+    } else if (fileType === "text/plain") {
+      // For plain text files
       const text = fileBuffer.toString("utf-8");
       docs = [
         new Document({
@@ -42,6 +37,26 @@ export async function processDocument(
           },
         }),
       ];
+    } else if (
+      fileType === "application/msword" ||
+      fileType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ) {
+      // For Word documents
+      const result = await mammoth.extractRawText({ buffer: fileBuffer });
+      docs = [
+        new Document({
+          pageContent: result.value,
+          metadata: {
+            source: fileName,
+          },
+        }),
+      ];
+    } else if (
+      fileType === "application/vnd.ms-powerpoint" ||
+      fileType === "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+    ) {
+      // For PowerPoint files - currently not supported
+      throw new Error("PowerPoint files are not supported yet");
     } else {
       throw new Error(`Unsupported file type: ${fileType}`);
     }
