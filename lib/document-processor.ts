@@ -5,6 +5,8 @@ import { getPineconeIndex } from "./vectorstore";
 import { Document } from "@langchain/core/documents";
 import { PineconeStore } from "@langchain/pinecone";
 import mammoth from "mammoth";
+import AdmZip from 'adm-zip';
+import { DOMParser } from '@xmldom/xmldom';
 
 if (!process.env.OPENAI_API_KEY) {
   throw new Error("OPENAI_API_KEY is not set in environment variables");
@@ -52,11 +54,75 @@ export async function processDocument(
         }),
       ];
     } else if (
-      fileType === "application/vnd.ms-powerpoint" ||
       fileType === "application/vnd.openxmlformats-officedocument.presentationml.presentation"
     ) {
-      // For PowerPoint files - currently not supported
-      throw new Error("PowerPoint files are not supported yet");
+      // For PPTX files - these are actually zip files with XML content
+      try {
+        console.log("Attempting to parse PPTX file...");
+        
+        // Read the .pptx file as a zip
+        const zip = new AdmZip(fileBuffer);
+        let slideText = '';
+        
+        // Find all slide XML entries
+        const slideEntries = zip.getEntries().filter((entry: AdmZip.IZipEntry) => 
+          entry.entryName.startsWith('ppt/slides/slide') && 
+          entry.entryName.endsWith('.xml')
+        );
+        
+        console.log(`Found ${slideEntries.length} slides in the presentation`);
+        
+        // Sort the slides by their number to maintain order
+        slideEntries.sort((a: AdmZip.IZipEntry, b: AdmZip.IZipEntry) => {
+          const numA = parseInt(a.entryName.replace(/\D/g, ''));
+          const numB = parseInt(b.entryName.replace(/\D/g, ''));
+          return numA - numB;
+        });
+        
+        // Process each slide
+        slideEntries.forEach((entry: AdmZip.IZipEntry, index: number) => {
+          const slideContent = zip.readAsText(entry);
+          slideText += `Slide ${index + 1}:\n`;
+          
+          // Use XML DOM to extract text content
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(slideContent, 'text/xml');
+          
+          // Extract text from all "a:t" elements (text elements in OOXML)
+          const textNodes = xmlDoc.getElementsByTagName('a:t');
+          for (let i = 0; i < textNodes.length; i++) {
+            const text = textNodes[i].textContent;
+            if (text && text.trim()) {
+              slideText += text.trim() + '\n';
+            }
+          }
+          
+          slideText += '\n';
+        });
+        
+        console.log(`Extracted ${slideText.length} characters of text from the presentation`);
+        
+        if (slideText.trim().length > 0) {
+          docs = [
+            new Document({
+              pageContent: slideText,
+              metadata: {
+                source: fileName,
+              },
+            }),
+          ];
+        } else {
+          throw new Error("No text content found in the PowerPoint file");
+        }
+      } catch (error) {
+        console.error("Error parsing PPTX:", error);
+        throw new Error(`Failed to parse PowerPoint file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+    } else if (
+      fileType === "application/vnd.ms-powerpoint"
+    ) {
+      // For older PPT files (not supported)
+      throw new Error("Older PowerPoint (.ppt) files are not supported. Please convert to .pptx");
     } else {
       throw new Error(`Unsupported file type: ${fileType}`);
     }
@@ -71,13 +137,23 @@ export async function processDocument(
 
     // Add userId to metadata
     const docsWithUserId = splitDocs.map((doc: Document) => {
+      // Clean up metadata to ensure it only contains supported types
+      const cleanMetadata: Record<string, string | number | boolean> = {
+        ...doc.metadata,
+        userId: userId,
+        fileName: fileName,
+      };
+      
+      // Remove any complex objects from metadata
+      Object.keys(cleanMetadata).forEach(key => {
+        if (typeof cleanMetadata[key] === 'object' && cleanMetadata[key] !== null) {
+          delete cleanMetadata[key];
+        }
+      });
+
       return {
         ...doc,
-        metadata: {
-          ...doc.metadata,
-          userId: userId,
-          fileName: fileName,
-        },
+        metadata: cleanMetadata,
       };
     });
 
@@ -88,12 +164,20 @@ export async function processDocument(
     });
 
     const index = await getPineconeIndex();
+    
+    console.log(`Uploading ${docsWithUserId.length} document chunks to Pinecone...`);
 
-    // Store documents in Pinecone
-    await PineconeStore.fromDocuments(docsWithUserId, embeddings, {
-      pineconeIndex: index,
-      namespace: "notemaster", // Using a single namespace for all users
-    });
+    try {
+      // Store documents in Pinecone
+      await PineconeStore.fromDocuments(docsWithUserId, embeddings, {
+        pineconeIndex: index,
+        namespace: "notemaster", // Using a single namespace for all users
+      });
+      console.log("Documents successfully uploaded to Pinecone");
+    } catch (pineconeError) {
+      console.error("Error uploading to Pinecone:", pineconeError);
+      throw pineconeError;
+    }
 
     return {
       success: true,
