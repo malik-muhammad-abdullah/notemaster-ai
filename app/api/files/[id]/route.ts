@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import { prisma } from "@/prisma/client";
 import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { deleteVectorEmbeddings } from "@/lib/vectorstore";
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION!,
@@ -70,6 +71,16 @@ export async function DELETE(
     } catch (s3Error) {
       console.error('S3 deletion error:', s3Error);
       // Continue with database deletion even if S3 deletion fails
+      // This prevents orphaned database records
+    }
+
+    // Delete vector embeddings from Pinecone
+    try {
+      await deleteVectorEmbeddings(file.userId, file.filename);
+      console.log('Successfully deleted vector embeddings from Pinecone');
+    } catch (vectorError) {
+      console.error('Vector deletion error:', vectorError);
+      // Continue with database deletion even if vector deletion fails
       // This prevents orphaned database records
     }
 
