@@ -1,5 +1,12 @@
 export { default } from "next-auth/middleware";
 
 export const config = {
-  matcher: [],
+  matcher: [
+    // '/dashboard',
+    // '/coding-assistant',
+    // '/quiz-generation',
+    // '/real-time-text-tutoring',
+    // '/study-guide',
+    // '/summarization',
+  ],
 };

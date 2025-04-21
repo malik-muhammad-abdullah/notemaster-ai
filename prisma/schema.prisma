@@ -83,6 +83,7 @@ model FileUpload {
 model ChatConversation {
   id        String       @id @default(cuid())
   title     String
+  type      String       @default("GENERAL") // Types: GENERAL, CODING_ASSISTANT, REAL_TIME_TEXT_TUTORING
   userId    String
   user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages  ChatMessage[]
