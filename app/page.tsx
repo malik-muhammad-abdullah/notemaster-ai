@@ -47,7 +47,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+      <div className="px-4 py-12 sm:px-6 max-w-6xl mx-auto">
         {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white sm:text-5xl md:text-6xl">

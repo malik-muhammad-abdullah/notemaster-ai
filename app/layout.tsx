@@ -31,7 +31,11 @@ export default function RootLayout({
       >
         <AuthProvider>
           <MainNavigation />
-          <main>{children}</main>
+          <div className="min-h-screen pt-16">
+            <main id="main-content" className="w-full flex-grow">
+              {children}
+            </main>
+          </div>
         </AuthProvider>
       </body>
     </html>
