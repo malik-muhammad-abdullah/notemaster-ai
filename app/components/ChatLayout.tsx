@@ -216,7 +216,7 @@ export default function ChatLayout({ title, apiEndpoint, children }: ChatLayoutP
   }
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-[calc(100vh-4rem)]">
       {/* Sidebar */}
       <div className="w-64 bg-gray-50 dark:bg-gray-900 overflow-y-auto border-r border-gray-200 dark:border-gray-800">
         <div className="p-4">

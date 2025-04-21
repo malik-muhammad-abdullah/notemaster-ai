@@ -25,16 +25,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="h-full">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full`}
       >
         <AuthProvider>
-          <MainNavigation />
-          <div className="min-h-screen pt-16">
-            <main id="main-content" className="w-full flex-grow">
-              {children}
-            </main>
+          <div className="flex flex-col h-full">
+            <MainNavigation />
+            <div className="flex-grow">
+              <main id="main-content" className="h-full">
+                {children}
+              </main>
+            </div>
           </div>
         </AuthProvider>
       </body>
