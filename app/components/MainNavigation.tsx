@@ -55,20 +55,6 @@ export default function MainNavigation() {
     setSidebarOpen(false);
   };
 
-  if (status === "loading") {
-    return (
-      <div className="fixed inset-0 bg-white z-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="relative inline-flex">
-            <div className="w-20 h-20 rounded-full border-8 border-gray-200"></div>
-            <div className="absolute top-0 left-0 w-20 h-20 rounded-full border-8 border-blue-500 border-t-transparent animate-spin"></div>
-          </div>
-          <p className="mt-6 text-xl font-medium text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <>
       <nav className="bg-gray-800 text-white fixed top-0 left-0 right-0 z-30">
