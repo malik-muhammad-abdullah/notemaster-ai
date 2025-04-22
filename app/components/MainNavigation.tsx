@@ -42,13 +42,25 @@ export default function MainNavigation() {
   useEffect(() => {
     if (sidebarOpen) {
       document.body.classList.add('sidebar-open');
+      // Add click handler to close sidebar when clicking outside
+      const handleOverlayClick = (event: MouseEvent) => {
+        // Check if the click is on the overlay (::after element)
+        // by checking if the click is not on a sidebar element
+        if (sidebarOpen && 
+            !(event.target as HTMLElement).closest('.sidebar') && 
+            !(event.target as HTMLElement).closest('button[aria-expanded="true"]')) {
+          setSidebarOpen(false);
+        }
+      };
+      
+      document.addEventListener('click', handleOverlayClick);
+      return () => {
+        document.body.classList.remove('sidebar-open');
+        document.removeEventListener('click', handleOverlayClick);
+      };
     } else {
       document.body.classList.remove('sidebar-open');
     }
-    
-    return () => {
-      document.body.classList.remove('sidebar-open');
-    };
   }, [sidebarOpen]);
 
   const closeSidebar = () => {

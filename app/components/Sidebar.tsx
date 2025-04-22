@@ -103,7 +103,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
 
   return (
     <div
-      className={`fixed top-16 bottom-0 left-0 w-64 bg-gray-100 dark:bg-gray-800 shadow-lg transition-all duration-300 transform ${
+      className={`sidebar fixed top-16 bottom-0 left-0 w-64 bg-gray-100 dark:bg-gray-800 shadow-lg transition-all duration-300 transform ${
         isOpen ? "translate-x-0" : "-translate-x-full"
       } z-40`}
     >

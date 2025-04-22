@@ -52,6 +52,26 @@ body.sidebar-open #main-content {
   @apply overflow-hidden;
 }
 
+/* Create overlay when sidebar is open */
+body.sidebar-open::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(3px) brightness(0.8);
+  z-index: 5;
+  animation: fadeIn 0.3s ease-out;
+  pointer-events: auto;
+}
+
+/* Sidebar should be above the overlay */
+body.sidebar-open .sidebar {
+  z-index: 10;
+}
+
 /* Global dark mode styles */
 .dark body {
   @apply bg-gray-900 text-white;
