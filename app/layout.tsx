@@ -5,6 +5,7 @@ import AuthProvider from "./auth/Provider";
 import MainNavigation from "./components/MainNavigation";
 import { LoadingProvider } from "./components/LoadingProvider";
 import MainContentWrapper from "./components/MainContentWrapper";
+import NavigationEvents from "./components/NavigationEvents";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,6 +36,7 @@ export default function RootLayout({
           <LoadingProvider>
             <div className="flex flex-col h-full">
               <MainNavigation />
+              <NavigationEvents />
               <div className="flex-grow">
                 <main id="main-content" className="h-full">
                   <MainContentWrapper>

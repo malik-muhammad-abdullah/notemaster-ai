@@ -1,10 +1,10 @@
 "use client";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import Sidebar from "./Sidebar";
+import AppLink from "./AppLink";
 
 export default function MainNavigation() {
   const pathname = usePathname();
@@ -86,9 +86,9 @@ export default function MainNavigation() {
               </button>
               
               <div className="flex-shrink-0">
-                <Link href="/">
+                <AppLink href="/">
                 <span className="font-bold text-xl">NoteMaster AI</span>
-                    </Link>
+                </AppLink>
               </div>
             </div>
             <div className="hidden md:block">
@@ -135,7 +135,7 @@ export default function MainNavigation() {
                         <p className="text-sm text-gray-500">Signed in as</p>
                         <p className="text-sm font-medium text-gray-900 break-words">{session.user.email}</p>
                       </div>
-                  <Link
+                  <AppLink
                     href="/api/auth/signout"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 flex items-center"
                         onClick={() => setDropdownOpen(false)}
@@ -145,16 +145,16 @@ export default function MainNavigation() {
                           <path d="M12.293 6.293a1 1 0 011.414 0l2 2a1 1 0 010 1.414l-2 2a1 1 0 01-1.414-1.414L13.586 9H7a1 1 0 010-2h6.586l-1.293-1.293a1 1 0 010-1.414z" />
                         </svg>
                     Sign Out
-                  </Link>
+                  </AppLink>
                     </div>
                   </div>
                 ) : (
-                  <Link
+                  <AppLink
                     href="/api/auth/signin"
                     className="text-white bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-md text-sm font-medium transition-all duration-200 ease-in-out shadow-md hover:shadow-lg transform hover:-translate-y-0.5 text-center"
                   >
                     Sign In
-                  </Link>
+                  </AppLink>
                 )}
               </div>
             </div>
@@ -253,7 +253,7 @@ export default function MainNavigation() {
                   </div>
                 </div>
                 
-                <Link
+                <AppLink
                   href="/api/auth/signout"
                   className="flex items-center space-x-2 px-3 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md text-sm font-medium transition-colors duration-200 w-full"
                   onClick={() => setMobileMenuOpen(false)}
@@ -263,10 +263,10 @@ export default function MainNavigation() {
                     <path d="M12.293 6.293a1 1 0 011.414 0l2 2a1 1 0 010 1.414l-2 2a1 1 0 01-1.414-1.414L13.586 9H7a1 1 0 010-2h6.586l-1.293-1.293a1 1 0 010-1.414z" />
                   </svg>
                   Sign Out
-                </Link>
+                </AppLink>
               </div>
             ) : (
-              <Link
+              <AppLink
                 href="/api/auth/signin"
                 className="flex items-center space-x-2 px-3 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md text-sm font-medium transition-colors duration-200 w-full"
                 onClick={() => setMobileMenuOpen(false)}
@@ -276,7 +276,7 @@ export default function MainNavigation() {
                   <path d="M7.293 6.293a1 1 0 011.414 0l2 2a1 1 0 010 1.414l-2 2a1 1 0 01-1.414-1.414L8.586 9H2a1 1 0 010-2h6.586L7.293 5.707a1 1 0 010-1.414z" />
                 </svg>
                 Sign In
-              </Link>
+              </AppLink>
             )}
           </div>
         </div>
