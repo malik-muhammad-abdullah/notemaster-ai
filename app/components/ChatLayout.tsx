@@ -32,6 +32,7 @@ export default function ChatLayout({ title, apiEndpoint, children }: ChatLayoutP
   const [isLoading, setIsLoading] = useState(false);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
+  const [isConversationLoading, setIsConversationLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -49,6 +50,11 @@ export default function ChatLayout({ title, apiEndpoint, children }: ChatLayoutP
     }
   }, [status, apiEndpoint]);
 
+  // Debug the loading state
+  useEffect(() => {
+    console.log("isConversationLoading:", isConversationLoading);
+  }, [isConversationLoading]);
+
   // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -58,6 +64,31 @@ export default function ChatLayout({ title, apiEndpoint, children }: ChatLayoutP
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
+    }
+  }, []);
+
+  // Check for test parameters in development mode
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const testParam = urlParams.get('test');
+      
+      if (testParam === 'skeleton') {
+        console.log("Test mode: Showing skeleton loader");
+        setIsConversationLoading(true);
+        
+        // Automatically hide after 5 seconds
+        const timer = setTimeout(() => {
+          setIsConversationLoading(false);
+          console.log("Test mode: Hiding skeleton loader after timeout");
+          
+          // Clean URL after test
+          const newUrl = window.location.pathname;
+          window.history.replaceState({}, document.title, newUrl);
+        }, 5000);
+        
+        return () => clearTimeout(timer);
+      }
     }
   }, []);
 
@@ -101,7 +132,14 @@ export default function ChatLayout({ title, apiEndpoint, children }: ChatLayoutP
   };
 
   const loadConversation = async (conversationId: string) => {
+    setIsConversationLoading(true);
+    console.log("Loading conversation, setting isConversationLoading to true");
+    
     try {
+      // Simulate loading delay for better visualization in development
+      // Remove this setTimeout in production
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       const response = await fetch(`/api${apiEndpoint}/conversations/${conversationId}`);
       const data = await response.json();
       if (data.messages) {
@@ -110,6 +148,9 @@ export default function ChatLayout({ title, apiEndpoint, children }: ChatLayoutP
       }
     } catch (error) {
       console.error(`Error loading conversation for ${apiEndpoint}:`, error);
+    } finally {
+      console.log("Finished loading conversation, setting isConversationLoading to false");
+      setIsConversationLoading(false);
     }
   };
 
@@ -342,7 +383,41 @@ export default function ChatLayout({ title, apiEndpoint, children }: ChatLayoutP
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 bg-chat-pattern bg-white dark:bg-gray-800 chat-scrollbar">
-          {messages.length === 0 ? (
+          {isConversationLoading ? (
+            <div className="space-y-8 py-4">
+              <div className="text-center mb-6 text-sm text-gray-500 dark:text-gray-400">
+                Loading conversation...
+              </div>
+              {/* Assistant skeleton */}
+              <div className="flex justify-start mr-12">
+                <div className="flex items-start space-x-2">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 skeleton-shimmer"></div>
+                  <div className="max-w-[85%] w-64 h-20 rounded-2xl bg-gray-200 dark:bg-gray-700 skeleton-shimmer"></div>
+                </div>
+              </div>
+              {/* User skeleton */}
+              <div className="flex justify-end ml-12">
+                <div className="flex items-start space-x-2">
+                  <div className="max-w-[85%] w-48 h-12 rounded-2xl bg-gray-200 dark:bg-gray-700 skeleton-shimmer"></div>
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 skeleton-shimmer"></div>
+                </div>
+              </div>
+              {/* Assistant skeleton */}
+              <div className="flex justify-start mr-12">
+                <div className="flex items-start space-x-2">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 skeleton-shimmer"></div>
+                  <div className="max-w-[85%] w-80 h-16 rounded-2xl bg-gray-200 dark:bg-gray-700 skeleton-shimmer"></div>
+                </div>
+              </div>
+              {/* Assistant skeleton */}
+              <div className="flex justify-start mr-12">
+                <div className="flex items-start space-x-2">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 skeleton-shimmer"></div>
+                  <div className="max-w-[85%] w-72 h-10 rounded-2xl bg-gray-200 dark:bg-gray-700 skeleton-shimmer"></div>
+                </div>
+              </div>
+            </div>
+          ) : messages.length === 0 ? (
             <div className="h-full flex items-center justify-center">
               <div className="text-center max-w-md p-6 rounded-2xl bg-white dark:bg-gray-800 shadow-md border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-shadow duration-300">
                 <div className="w-16 h-16 mx-auto mb-4 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center">
