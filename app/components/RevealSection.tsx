@@ -1,5 +1,5 @@
 "use client";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
 interface RevealSectionProps {
   children: ReactNode;
@@ -12,8 +12,25 @@ export default function RevealSection({
   delay = "100", 
   className = "" 
 }: RevealSectionProps) {
+  const [isVisible, setIsVisible] = useState(false);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <div className={`reveal-delay-${delay} ${className}`}>
+    <div 
+      className={`
+        transform transition-all duration-700 
+        ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} 
+        reveal-delay-${delay} 
+        ${className}
+      `}
+    >
       {children}
     </div>
   );
