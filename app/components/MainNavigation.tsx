@@ -15,6 +15,21 @@ export default function MainNavigation() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
+  // Get current page title for breadcrumb
+  const getPageTitle = () => {
+    if (pathname === '/') return null;
+    if (pathname.startsWith('/chat')) return 'Chat';
+    if (pathname.startsWith('/study-guide')) return 'Study Guide';
+    if (pathname.startsWith('/summarization')) return 'Summarization';
+    if (pathname.startsWith('/quiz-generation')) return 'Quiz Generation';
+    if (pathname.startsWith('/real-time-text-tutoring')) return 'Text Tutoring';
+    if (pathname.startsWith('/file-upload')) return 'File Upload';
+    if (pathname.startsWith('/coding-assistant')) return 'Coding Assistant';
+    return null;
+  };
+
+  const currentPageTitle = getPageTitle();
+
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -99,9 +114,21 @@ export default function MainNavigation() {
               
               <div className="flex-shrink-0">
                 <AppLink href="/">
-                <span className="font-bold text-xl">NoteMaster AI</span>
+                  <span className="font-bold text-xl">NoteMaster AI</span>
                 </AppLink>
               </div>
+              
+              {/* Page title breadcrumb */}
+              {currentPageTitle && (
+                <div className="flex items-center ml-2 sm:ml-4">
+                  <svg className="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-300 text-sm sm:text-base font-medium ml-1">
+                    {currentPageTitle}
+                  </span>
+                </div>
+              )}
             </div>
             <div className="hidden md:block">
               <div className="ml-4 flex items-center md:ml-6">
