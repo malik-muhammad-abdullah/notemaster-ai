@@ -14,6 +14,12 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
+  callbacks: {
+    redirect({ url, baseUrl }) {
+      // After sign in or sign out, always redirect to the root path
+      return baseUrl;
+    },
+  },
 };
 
 const handler = NextAuth(authOptions);
