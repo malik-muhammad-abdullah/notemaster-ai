@@ -88,6 +88,28 @@ body.sidebar-open .sidebar {
   to { transform: scale(1); }
 }
 
+/* Chat animations */
+@keyframes slideInRight {
+  from { transform: translateX(20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); }
+  70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+}
+
+@keyframes typingBounce {
+  0%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-5px); }
+}
+
 .page-reveal {
   animation: fadeIn 0.45s ease-out, scaleUp 0.4s ease-out;
 }
@@ -102,6 +124,53 @@ body.sidebar-open .sidebar {
 
 .reveal-delay-300 {
   animation-delay: 0.18s;
+}
+
+/* Custom chat animations */
+.user-message-enter {
+  animation: slideInRight 0.3s ease-out forwards;
+}
+
+.bot-message-enter {
+  animation: slideInLeft 0.3s ease-out forwards;
+}
+
+.typing-indicator div {
+  animation: typingBounce 1.4s infinite ease-in-out;
+}
+
+.typing-indicator div:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.typing-indicator div:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator div:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.input-focus-effect:focus {
+  animation: pulseGlow 2s infinite;
+}
+
+/* Custom scrollbar for chat */
+.chat-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 20px;
+}
+
+.dark .chat-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(75, 85, 99, 0.5);
 }
 
 /* Loading bar animation */
