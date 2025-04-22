@@ -56,7 +56,17 @@ export default function MainNavigation() {
   };
 
   if (status === "loading") {
-    return null;
+    return (
+      <div className="fixed inset-0 bg-white z-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="relative inline-flex">
+            <div className="w-20 h-20 rounded-full border-8 border-gray-200"></div>
+            <div className="absolute top-0 left-0 w-20 h-20 rounded-full border-8 border-blue-500 border-t-transparent animate-spin"></div>
+          </div>
+          <p className="mt-6 text-xl font-medium text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -251,50 +261,46 @@ export default function MainNavigation() {
                       />
                     </div>
                   )}
-                  <span className="text-sm font-medium text-white">
-                    {session.user.name}
-                  </span>
+                  <div>
+                    <div className="text-sm font-medium text-white">{session.user.name}</div>
+                    <div className="text-xs text-gray-300">{session.user.email}</div>
+                  </div>
                 </div>
-                <div className="px-3 py-1 text-xs text-gray-400 break-words max-w-xs">
-                  {session.user.email}
-                </div>
-              <Link
-                href="/api/auth/signout"
-                  className="flex items-center px-3 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md text-sm font-medium ml-4 transition-colors duration-200 mt-2"
-              >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                
+                <Link
+                  href="/api/auth/signout"
+                  className="flex items-center space-x-2 px-3 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md text-sm font-medium transition-colors duration-200 w-full"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V7.414a1 1 0 00-.293-.707L11.414 2.414A1 1 0 0010.707 2H4a1 1 0 00-1 1zm9 5a1 1 0 00-1 1v6a1 1 0 002 0V9a1 1 0 00-1-1z" clipRule="evenodd" />
                     <path d="M12.293 6.293a1 1 0 011.414 0l2 2a1 1 0 010 1.414l-2 2a1 1 0 01-1.414-1.414L13.586 9H7a1 1 0 010-2h6.586l-1.293-1.293a1 1 0 010-1.414z" />
                   </svg>
-                Sign Out
-              </Link>
+                  Sign Out
+                </Link>
               </div>
             ) : (
               <Link
                 href="/api/auth/signin"
-                className="block bg-blue-600 hover:bg-blue-700 text-white rounded-md py-2 px-5 text-base font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 mx-2 text-center"
+                className="flex items-center space-x-2 px-3 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md text-sm font-medium transition-colors duration-200 w-full"
+                onClick={() => setMobileMenuOpen(false)}
               >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V7.414a1 1 0 00-.293-.707L11.414 2.414A1 1 0 0010.707 2H4a1 1 0 00-1 1zm9 5a1 1 0 00-1 1v6a1 1 0 002 0V9a1 1 0 00-1-1z" clipRule="evenodd" />
+                  <path d="M7.293 6.293a1 1 0 011.414 0l2 2a1 1 0 010 1.414l-2 2a1 1 0 01-1.414-1.414L8.586 9H2a1 1 0 010-2h6.586L7.293 5.707a1 1 0 010-1.414z" />
+                </svg>
                 Sign In
               </Link>
             )}
           </div>
         </div>
       </nav>
+
+      {/* Sidebar */}
+      <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
       
-      {/* Main content container with sidebar space */}
-      <div className="transition-all duration-300">
-        {/* Sidebar component */}
-        <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
-      </div>
-      
-      {/* Overlay when sidebar is open - uses backdrop blur with dimming effect */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 backdrop-blur-sm bg-black/15 dark:bg-black/30 z-20 transition-all duration-300 will-change-transform" 
-          onClick={closeSidebar}
-          style={{ marginLeft: '0' }}
-        />
-      )}
+      {/* Push content down when navbar is present */}
+      <div className="h-16"></div>
     </>
   );
 } 
