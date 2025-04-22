@@ -137,7 +137,7 @@ export default function MainNavigation() {
                       </div>
                   <AppLink
                     href="/api/auth/signout"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 flex items-center"
+                        className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 flex items-center"
                         onClick={() => setDropdownOpen(false)}
                   >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
