@@ -14,6 +14,10 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
+  pages: {
+    signIn: '/auth/signin',
+    signOut: '/auth/signout',
+  },
   callbacks: {
     redirect({ url, baseUrl }) {
       // After sign in or sign out, always redirect to the root path

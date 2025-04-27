@@ -38,7 +38,7 @@ export default function RootLayout({
               <MainNavigation />
               <NavigationEvents />
               <div className="flex-grow">
-                <main id="main-content" className="h-full">
+                <main id="main-content" className="h-fulllll">
                   <MainContentWrapper>
                     {children}
                   </MainContentWrapper>
