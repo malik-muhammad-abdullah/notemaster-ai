@@ -1,7 +1,11 @@
 "use client";
 import ChatLayout from "@/app/components/ChatLayout";
+import { useState } from 'react';
 
 export default function QuizGenerationPage() {
+  const [questionType, setQuestionType] = useState('MCQs');
+  const [difficulty, setDifficulty] = useState('medium');
+
   return (
     <ChatLayout 
       title="NoteMaster AI Quiz Generator" 

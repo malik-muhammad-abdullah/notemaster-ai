@@ -29,9 +29,11 @@ export async function POST(request: Request) {
     const body = await request.json();
     console.log("Quiz Generation API: Request body received", { 
       hasMessage: !!body.message, 
-      hasConversationId: !!body.conversationId
+      hasConversationId: !!body.conversationId,
+      hasQuestionType: !!body.questionType,
+      hasDifficulty: !!body.difficulty
     });
-    const { message, conversationId } = body;
+    const { message, conversationId, questionType, difficulty } = body;
 
     if (!message) {
       return NextResponse.json(
@@ -43,6 +45,20 @@ export async function POST(request: Request) {
     if (!conversationId) {
       return NextResponse.json(
         { error: "ConversationId is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!questionType) {
+      return NextResponse.json(
+        { error: "Question type is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!difficulty) {
+      return NextResponse.json(
+        { error: "Difficulty is required" },
         { status: 400 }
       );
     }
@@ -126,6 +142,9 @@ export async function POST(request: Request) {
       7. For multiple-choice, label options as A, B, C, D, etc.
       8. Create questions that test different cognitive levels (recall, application, analysis)
       
+      Question Type: {questionType}
+      Difficulty: {difficulty}
+      
       Context from relevant documents:
       {context}
       
@@ -147,6 +166,8 @@ export async function POST(request: Request) {
       context: formattedDocs,
       chatHistory: chatHistory,
       question: message,
+      questionType: questionType,
+      difficulty: difficulty
     });
 
     // Store the assistant's response in the database

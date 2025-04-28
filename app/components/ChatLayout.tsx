@@ -35,6 +35,11 @@ export default function ChatLayout({ title, apiEndpoint, children }: ChatLayoutP
   const [isConversationLoading, setIsConversationLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [questionType, setQuestionType] = useState('MCQs');
+  const [difficulty, setDifficulty] = useState('medium');
+  const [topic, setTopic] = useState('');
+  const [numQuestions, setNumQuestions] = useState(1);
+  const [includeAnswers, setIncludeAnswers] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -179,7 +184,11 @@ export default function ChatLayout({ title, apiEndpoint, children }: ChatLayoutP
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim() || isLoading) return;
+    let userMsg = message;
+    if (apiEndpoint === '/quiz-generation') {
+      userMsg = `Generate ${numQuestions} ${difficulty} ${questionType} questions on the topic: ${topic}${includeAnswers ? ' (with answers)' : ' (no answers)'}`;
+    }
+    if ((apiEndpoint === '/quiz-generation' && (!topic.trim() || !numQuestions || numQuestions < 1 || numQuestions > 25)) || !userMsg.trim() || isLoading) return;
     
     console.log(`Submitting message to ${apiEndpoint}, currentConversationId:`, currentConversationId);
     let activeConversationId = currentConversationId;
@@ -216,25 +225,33 @@ export default function ChatLayout({ title, apiEndpoint, children }: ChatLayoutP
     
     const userMessage: Message = {
       role: "user",
-      content: message,
+      content: userMsg,
     };
 
     // Add user message to UI
     setMessages((prev) => [...prev, userMessage]);
-    setMessage("");
+    if (apiEndpoint !== '/quiz-generation') setMessage("");
     setIsLoading(true);
 
     try {
       console.log(`Sending message to ${apiEndpoint} with conversationId:`, activeConversationId);
+      const requestBody: any = {
+        message: userMessage.content,
+        conversationId: activeConversationId,
+        topic: topic,
+        numQuestions: numQuestions,
+        includeAnswers: includeAnswers,
+      };
+      if (apiEndpoint === '/quiz-generation') {
+        requestBody.questionType = questionType;
+        requestBody.difficulty = difficulty;
+      }
       const response = await fetch(`/api${apiEndpoint}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          message: userMessage.content,
-          conversationId: activeConversationId,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const data = await response.json();
@@ -531,7 +548,64 @@ export default function ChatLayout({ title, apiEndpoint, children }: ChatLayoutP
 
         {/* Input */}
         <div className="bg-gradient-to-b from-white/70 to-white/90 dark:from-gray-800/70 dark:to-gray-800/90 backdrop-blur-md px-6 py-4">
-          <form onSubmit={handleSubmit} className="flex space-x-4 max-w-4xl mx-auto">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-2 max-w-4xl mx-auto">
+            {apiEndpoint === '/quiz-generation' ? (
+              <div className="flex gap-2 mb-1 w-full">
+                <input
+                  type="number"
+                  min={1}
+                  max={25}
+                  value={numQuestions}
+                  onChange={e => setNumQuestions(Number(e.target.value))}
+                  placeholder="#"
+                  className="rounded-lg px-2 py-3 bg-gray-800 text-white w-24 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+                />
+                <select value={questionType} onChange={e => setQuestionType(e.target.value)} className="rounded-lg px-2 py-3 bg-gray-800 text-white flex-1">
+                  <option value="MCQs">Multiple Choice</option>
+                  <option value="short">Short Questions</option>
+                  <option value="long">Long Questions</option>
+                  <option value="truefalse">True/False</option>
+                </select>
+                <select value={difficulty} onChange={e => setDifficulty(e.target.value)} className="rounded-lg px-2 py-3 bg-gray-800 text-white flex-1">
+                  <option value="easy">Easy</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+                <input
+                  type="text"
+                  value={topic}
+                  onChange={e => setTopic(e.target.value)}
+                  placeholder="Enter topic..."
+                  className="rounded-lg px-2 py-3 bg-gray-800 text-white flex-1 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <label className="flex items-center gap-2 px-3 select-none">
+                  <span className="text-sm text-gray-200">Include Answers</span>
+                  <button
+                    type="button"
+                    aria-pressed={includeAnswers}
+                    onClick={() => setIncludeAnswers(v => !v)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${includeAnswers ? 'bg-blue-600' : 'bg-gray-600'}`}
+                  >
+                    <span
+                      className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform duration-200 ${includeAnswers ? 'translate-x-5' : 'translate-x-1'}`}
+                    />
+                  </button>
+                </label>
+                <button
+                  type="submit"
+                  disabled={isLoading || !topic.trim() || !numQuestions || numQuestions < 1 || numQuestions > 25}
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium px-6 py-3 rounded-full shadow-md disabled:opacity-50 disabled:cursor-not-allowed transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  <div className="flex items-center space-x-2">
+                    <span>Send</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M10.894 2.553a1 1 0 00-1.414 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                    </svg>
+                  </div>
+                </button>
+              </div>
+            ) : (
+              <div className="flex space-x-4">
             <input
               ref={inputRef}
               type="text"
@@ -553,6 +627,8 @@ export default function ChatLayout({ title, apiEndpoint, children }: ChatLayoutP
                 </svg>
               </div>
             </button>
+              </div>
+            )}
           </form>
         </div>
       </div>
