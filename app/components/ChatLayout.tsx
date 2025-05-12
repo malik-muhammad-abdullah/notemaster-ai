@@ -182,6 +182,23 @@ export default function ChatLayout({ title, apiEndpoint, children }: ChatLayoutP
     }
   };
 
+  // Add event listener for loading conversations from other components
+  useEffect(() => {
+    const handleLoadConversation = (event: CustomEvent<{ conversationId: string }>) => {
+      if (event.detail && event.detail.conversationId) {
+        loadConversation(event.detail.conversationId);
+      }
+    };
+
+    // Add event listener
+    window.addEventListener('load-conversation', handleLoadConversation as EventListener);
+    
+    // Clean up
+    return () => {
+      window.removeEventListener('load-conversation', handleLoadConversation as EventListener);
+    };
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     let userMsg = message;
