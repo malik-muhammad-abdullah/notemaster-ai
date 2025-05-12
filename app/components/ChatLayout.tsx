@@ -575,15 +575,15 @@ export default function ChatLayout({ title, apiEndpoint, children }: ChatLayoutP
                   value={numQuestions}
                   onChange={e => setNumQuestions(Number(e.target.value))}
                   placeholder="#"
-                  className="rounded-lg px-2 py-3 bg-gray-800 text-white w-24 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+                  className="rounded-lg px-2 py-3 bg-white text-gray-900 dark:bg-gray-800 dark:text-white w-24 border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-center shadow-sm"
                 />
-                <select value={questionType} onChange={e => setQuestionType(e.target.value)} className="rounded-lg px-2 py-3 bg-gray-800 text-white flex-1">
+                <select value={questionType} onChange={e => setQuestionType(e.target.value)} className="rounded-lg px-2 py-3 bg-white text-gray-900 dark:bg-gray-800 dark:text-white flex-1 border border-gray-300 dark:border-gray-700 shadow-sm">
                   <option value="MCQs">Multiple Choice</option>
                   <option value="short">Short Questions</option>
                   <option value="long">Long Questions</option>
                   <option value="truefalse">True/False</option>
                 </select>
-                <select value={difficulty} onChange={e => setDifficulty(e.target.value)} className="rounded-lg px-2 py-3 bg-gray-800 text-white flex-1">
+                <select value={difficulty} onChange={e => setDifficulty(e.target.value)} className="rounded-lg px-2 py-3 bg-white text-gray-900 dark:bg-gray-800 dark:text-white flex-1 border border-gray-300 dark:border-gray-700 shadow-sm">
                   <option value="easy">Easy</option>
                   <option value="medium">Medium</option>
                   <option value="hard">Hard</option>
@@ -593,15 +593,15 @@ export default function ChatLayout({ title, apiEndpoint, children }: ChatLayoutP
                   value={topic}
                   onChange={e => setTopic(e.target.value)}
                   placeholder="Enter topic..."
-                  className="rounded-lg px-2 py-3 bg-gray-800 text-white flex-1 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="rounded-lg px-2 py-3 bg-white text-gray-900 dark:bg-gray-800 dark:text-white flex-1 border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
                 />
                 <label className="flex items-center gap-2 px-3 select-none">
-                  <span className="text-sm text-gray-200">Include Answers</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-200">Include Answers</span>
                   <button
                     type="button"
                     aria-pressed={includeAnswers}
                     onClick={() => setIncludeAnswers(v => !v)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${includeAnswers ? 'bg-blue-600' : 'bg-gray-600'}`}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${includeAnswers ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`}
                   >
                     <span
                       className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform duration-200 ${includeAnswers ? 'translate-x-5' : 'translate-x-1'}`}
