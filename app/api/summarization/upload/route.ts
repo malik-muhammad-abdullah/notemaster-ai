@@ -19,10 +19,7 @@ export async function POST(request: Request) {
 
     if (!session?.user?.email) {
       console.log("Summarization Upload API: Unauthorized - no valid session");
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Verify user exists
@@ -31,33 +28,27 @@ export async function POST(request: Request) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
-    
+
     const formData = await request.formData();
     const file = formData.get("file") as File;
-    
+
     if (!file) {
-      return NextResponse.json(
-        { error: "No file provided" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
-    
+
     // Extract text from the uploaded file
     const buffer = Buffer.from(await file.arrayBuffer());
     const fileContent = await extractTextFromFile(buffer, file.type, file.name);
-    
+
     if (!fileContent) {
       return NextResponse.json(
         { error: "Failed to extract content from file" },
         { status: 400 }
       );
     }
-    
+
     // Initialize language model
     const llm = new ChatOpenAI({
       modelName: "gpt-4o-mini",
@@ -77,11 +68,21 @@ export async function POST(request: Request) {
       4. Use clear, straightforward language
       5. Organize information logically
       
+      Format your summary using proper markdown:
+      - Use headings (##) for main sections
+      - Use bullet points or numbered lists where appropriate
+      - Use bold (**) for important terms or concepts
+      - Use italics (*) for emphasis
+      - Maintain proper spacing between sections
+      - Include a brief overview at the start
+      - End with key takeaways if applicable
+      
       Please summarize the following document:
       
       {document}
       
       Provide a comprehensive summary that captures the main points and key details of the document.
+      Remember to use proper markdown formatting for better readability.
     `);
 
     // Create a chain that combines the prompt template, LLM, and output parser
@@ -99,14 +100,17 @@ export async function POST(request: Request) {
     console.log("Summarization Upload API: Summary generated successfully");
     return NextResponse.json({
       message: {
-        content: summary
-      }
+        content: summary,
+      },
     });
   } catch (error) {
     console.error("Summarization Upload API error:", error);
     return NextResponse.json(
-      { error: "Failed to process file", details: error instanceof Error ? error.message : String(error) },
+      {
+        error: "Failed to process file",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
-} 
+}
