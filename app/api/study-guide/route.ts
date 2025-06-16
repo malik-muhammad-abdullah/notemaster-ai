@@ -20,16 +20,13 @@ export async function POST(request: Request) {
 
     if (!session?.user?.email) {
       console.log("Study Guide API: Unauthorized - no valid session");
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
-    console.log("Study Guide API: Request body received", { 
-      hasMessage: !!body.message, 
-      hasConversationId: !!body.conversationId
+    console.log("Study Guide API: Request body received", {
+      hasMessage: !!body.message,
+      hasConversationId: !!body.conversationId,
     });
     const { message, conversationId } = body;
 
@@ -53,10 +50,7 @@ export async function POST(request: Request) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Verify conversation exists and belongs to user
@@ -91,18 +85,24 @@ export async function POST(request: Request) {
     });
 
     // Get previous messages for context
-    const chatHistory = conversation.messages.map(msg => {
-      return `${msg.role === "user" ? "Human" : "Assistant"}: ${msg.content}`;
-    }).join("\n");
+    const chatHistory = conversation.messages
+      .map((msg) => {
+        return `${msg.role === "user" ? "Human" : "Assistant"}: ${msg.content}`;
+      })
+      .join("\n");
 
     // Query vector store for relevant documents
     const vectorSearchResults = await queryVectorStore(message, user.id, 8); // Getting more docs for study guides
-    const relevantDocs = vectorSearchResults.success && vectorSearchResults.results ? 
-      vectorSearchResults.results : [];
+    const relevantDocs =
+      vectorSearchResults.success && vectorSearchResults.results
+        ? vectorSearchResults.results
+        : [];
 
     // Format documents as string
-    const formattedDocs = relevantDocs.length > 0 ? 
-      formatDocumentsAsString(relevantDocs) : "No relevant documents found.";
+    const formattedDocs =
+      relevantDocs.length > 0
+        ? formatDocumentsAsString(relevantDocs)
+        : "No relevant documents found.";
 
     // Initialize language model
     const llm = new ChatOpenAI({
@@ -113,16 +113,26 @@ export async function POST(request: Request) {
 
     // Create a specialized prompt template for study guides
     const promptTemplate = PromptTemplate.fromTemplate(`
-      You are an expert education assistant that specializes in creating comprehensive study guides.
-      Your goal is to create well-structured, informative study guides based on the user's documents and queries.
+      You are an expert education assistant and exam preparation specialist. Your goal is to create comprehensive, 
+      exam-focused study guides that help students effectively prepare for their exams.
       
-      When creating a study guide:
-      1. Organize information in a clear, hierarchical structure
-      2. Include key concepts, definitions, and examples
-      3. Highlight important relationships between concepts
-      4. Add bullet points and numbered lists for clarity
-      5. Create sections with clear headings
-      6. Include a summary at the end
+      When creating an exam preparation guide:
+      1. Start with a brief overview of the topic and its importance
+      2. Break down the main concepts that will likely be tested
+      3. Provide specific study strategies for this particular subject
+      4. Include:
+         - Key definitions and terminology
+         - Important formulas or frameworks
+         - Common exam question types for this topic
+         - Sample practice questions with brief explanations
+         - Memory aids and mnemonics where applicable
+      5. Suggest a structured study timeline
+      6. Highlight common mistakes and misconceptions
+      7. Provide exam-day tips specific to this subject
+      8. End with a quick-reference summary of the most crucial points
+      
+      Format the guide with clear headings, bullet points, and numbered lists for easy reference.
+      Make it both comprehensive and scannable for quick review.
       
       Context from relevant documents:
       {context}
@@ -169,8 +179,11 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Study Guide API error:", error);
     return NextResponse.json(
-      { error: "Failed to process message", details: error instanceof Error ? error.message : String(error) },
+      {
+        error: "Failed to process message",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
-} 
+}
