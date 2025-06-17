@@ -5,17 +5,14 @@ import { prisma } from "@/prisma/client";
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params;
+    const { id } = params;
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -23,10 +20,7 @@ export async function GET(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Get conversation by ID and verify it belongs to the user
@@ -41,6 +35,8 @@ export async function GET(
           orderBy: {
             createdAt: "asc",
           },
+          // Skip the first message as it's the tutorial content
+          skip: 1,
         },
       },
     });
@@ -75,10 +71,7 @@ export async function DELETE(
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -86,10 +79,7 @@ export async function DELETE(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Find the conversation and verify it belongs to the user
@@ -123,4 +113,4 @@ export async function DELETE(
       { status: 500 }
     );
   }
-} 
+}
