@@ -44,10 +44,10 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String             @id @default(cuid())
   name          String?
-  email         String?   @unique
-  emailVerified DateTime? @map("email_verified")
+  email         String?            @unique
+  emailVerified DateTime?          @map("email_verified")
   image         String?
   accounts      Account[]
   sessions      Session[]
@@ -81,25 +81,25 @@ model FileUpload {
 }
 
 model ChatConversation {
-  id        String       @id @default(cuid())
+  id        String        @id @default(cuid())
   title     String
-  type      String       @default("GENERAL") // Types: GENERAL, CODING_ASSISTANT, REAL_TIME_TEXT_TUTORING
+  type      String        @default("GENERAL") // Types: GENERAL, CODING_ASSISTANT, REAL_TIME_TEXT_TUTORING
   userId    String
-  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages  ChatMessage[]
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 
   @@map("chat_conversations")
 }
 
 model ChatMessage {
-  id              String           @id @default(cuid())
-  content         String
-  role            String           // 'user' or 'assistant'
-  conversationId  String
-  conversation    ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  createdAt       DateTime         @default(now())
+  id             String           @id @default(cuid())
+  content        String
+  role           String // 'user' or 'assistant'
+  conversationId String
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime         @default(now())
 
   @@map("chat_messages")
 }

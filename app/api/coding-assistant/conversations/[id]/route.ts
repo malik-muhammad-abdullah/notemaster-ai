@@ -1,38 +1,30 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../../../auth/[...nextauth]/route";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/prisma/client";
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params;
     const session = await getServerSession(authOptions);
-
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Get the user ID first
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Get conversation by ID and verify it belongs to the user
-    const conversation = await prisma.chatConversation.findUnique({
+    const conversation = await prisma.chatConversation.findFirst({
       where: {
-        id,
+        id: params.id,
         userId: user.id,
         type: "CODING_ASSISTANT",
       },
@@ -52,12 +44,16 @@ export async function GET(
       );
     }
 
+    // Return the conversation in the expected format
     return NextResponse.json({
-      conversation,
-      messages: conversation.messages,
+      id: conversation.id,
+      title: conversation.title,
+      content:
+        conversation.messages[conversation.messages.length - 1]?.content || "",
+      createdAt: conversation.createdAt,
     });
   } catch (error) {
-    console.error("Error fetching coding assistant conversation:", error);
+    console.error("Error fetching conversation:", error);
     return NextResponse.json(
       { error: "Failed to fetch conversation" },
       { status: 500 }
@@ -75,10 +71,7 @@ export async function DELETE(
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -86,10 +79,7 @@ export async function DELETE(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Find the conversation and verify it belongs to the user
@@ -123,4 +113,4 @@ export async function DELETE(
       { status: 500 }
     );
   }
-} 
+}
