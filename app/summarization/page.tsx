@@ -1,11 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import { MarkdownComponents } from "../components/MarkdownComponents";
+import PdfExportButton from "../components/PdfExportButton";
 
 const ALLOWED_FILE_TYPES = [
   "application/pdf",
@@ -32,6 +33,7 @@ export default function SummarizationPage() {
   const [summary, setSummary] = useState<string>("");
   const [fileName, setFileName] = useState<string>("");
   const [copied, setCopied] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const validateFile = (file: File): string | null => {
     if (!ALLOWED_FILE_TYPES.includes(file.type)) {
@@ -482,36 +484,34 @@ export default function SummarizationPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mt-10 bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden"
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mt-8"
           >
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center space-x-3">
                   {getFileIcon(fileName)}
-                  <h2 className="ml-3 text-xl font-bold text-white">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                     Summary of {fileName}
-                  </h2>
+                  </h3>
                 </div>
-                <button
-                  onClick={handleCopy}
-                  className="px-3 py-1 text-sm bg-white text-blue-600 rounded-full flex items-center hover:bg-blue-50 transition-colors"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4 mr-1"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
+                <div className="flex space-x-4">
+                  <PdfExportButton
+                    contentRef={contentRef}
+                    fileName={`summary-${fileName}`}
+                  />
+                  <button
+                    onClick={handleCopy}
+                    className="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
                   >
-                    <path d="M8 2a1 1 0 000 2h2a1 1 0 100-2H8z" />
-                    <path d="M3 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v6h-4.586l1.293-1.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L10.414 13H15v3a2 2 0 01-2 2H5a2 2 0 01-2-2V5zM15 11h2a1 1 0 110 2h-2v-2z" />
-                  </svg>
-                  {copied ? "Copied!" : "Copy"}
-                </button>
+                    {copied ? "Copied!" : "Copy"}
+                  </button>
+                </div>
               </div>
-            </div>
-            <div className="p-8">
-              <div className="prose prose-blue dark:prose-invert lg:prose-lg max-w-none">
+              <div
+                ref={contentRef}
+                className="prose dark:prose-invert max-w-none"
+              >
                 <ReactMarkdown
                   components={MarkdownComponents}
                   remarkPlugins={[remarkGfm]}

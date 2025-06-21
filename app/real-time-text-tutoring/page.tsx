@@ -8,6 +8,7 @@ import type { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
+import PdfExportButton from "../components/PdfExportButton";
 
 // Custom components for markdown rendering
 const MarkdownComponents: Partial<Components> = {
@@ -241,6 +242,7 @@ export default function TextTutoringPage() {
   const [followUpQuestion, setFollowUpQuestion] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   // Fetch tutorials on component mount
   useEffect(() => {
@@ -437,7 +439,7 @@ export default function TextTutoringPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-indigo-950 dark:to-gray-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
@@ -564,134 +566,127 @@ export default function TextTutoringPage() {
                 <LoadingAnimation />
               ) : (
                 tutorial && (
-                  <>
-                    <div className="relative">
-                      <div className="absolute top-0 right-0 m-4">
-                        <button
-                          onClick={handleCopy}
-                          className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                        >
-                          {copied ? (
-                            <svg
-                              className="w-5 h-5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M5 13l4 4L19 7"
-                              />
-                            </svg>
-                          ) : (
-                            <svg
-                              className="w-5 h-5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                              />
-                            </svg>
-                          )}
-                        </button>
-                      </div>
-                      <div className="prose dark:prose-invert max-w-none">
-                        <ReactMarkdown
-                          components={MarkdownComponents}
-                          remarkPlugins={[remarkGfm]}
-                          rehypePlugins={[rehypeRaw, rehypeSanitize]}
-                        >
-                          {tutorial}
-                        </ReactMarkdown>
-                      </div>
-                    </div>
-
-                    {/* Chat Section */}
-                    <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                        Follow-up Questions
-                      </h3>
-
-                      {/* Chat Messages */}
-                      <div
-                        ref={chatContainerRef}
-                        className="space-y-4 mb-4 max-h-96 overflow-y-auto"
-                      >
-                        {messages.map((message, index) => (
-                          <div
-                            key={index}
-                            className={`flex ${
-                              message.role === "user"
-                                ? "justify-end"
-                                : "justify-start"
-                            }`}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="mt-8"
+                  >
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
+                      <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                          Interactive Tutorial
+                        </h2>
+                        <div className="flex space-x-4">
+                          <PdfExportButton
+                            contentRef={contentRef}
+                            fileName={`tutorial-${topic}`}
+                          />
+                          <button
+                            onClick={handleCopy}
+                            className="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
                           >
-                            <div
-                              className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                                message.role === "user"
-                                  ? "bg-blue-600 text-white"
-                                  : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
+                            {copied ? "Copied!" : "Copy"}
+                          </button>
+                        </div>
+                      </div>
+                      <div ref={contentRef}>
+                        <div className="prose dark:prose-invert max-w-none">
+                          <ReactMarkdown
+                            components={MarkdownComponents}
+                            remarkPlugins={[remarkGfm]}
+                            rehypePlugins={[rehypeRaw, rehypeSanitize]}
+                          >
+                            {tutorial}
+                          </ReactMarkdown>
+                        </div>
+
+                        {/* Chat Section */}
+                        <div className="mt-8 border-t border-gray-200 dark:border-gray-700 pt-6">
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                            Follow-up Questions
+                          </h3>
+
+                          {/* Chat Messages */}
+                          <div
+                            ref={chatContainerRef}
+                            className="space-y-4 mb-4 max-h-96 overflow-y-auto"
+                          >
+                            {messages.map((message, index) => (
+                              <div
+                                key={index}
+                                className={`flex ${
+                                  message.role === "user"
+                                    ? "justify-end"
+                                    : "justify-start"
+                                }`}
+                              >
+                                <div
+                                  className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                                    message.role === "user"
+                                      ? "bg-blue-600 text-white"
+                                      : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
+                                  }`}
+                                >
+                                  <div className="prose dark:prose-invert max-w-none">
+                                    <ReactMarkdown
+                                      components={MarkdownComponents}
+                                      remarkPlugins={[remarkGfm]}
+                                      rehypePlugins={[
+                                        rehypeRaw,
+                                        rehypeSanitize,
+                                      ]}
+                                    >
+                                      {message.content}
+                                    </ReactMarkdown>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                            {chatLoading && (
+                              <div className="flex justify-start">
+                                <div className="bg-gray-100 dark:bg-gray-700 rounded-lg px-4 py-2">
+                                  <div className="flex space-x-2">
+                                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
+                                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100" />
+                                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200" />
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Chat Input */}
+                          <form
+                            onSubmit={handleFollowUpQuestion}
+                            className="flex gap-4"
+                          >
+                            <input
+                              type="text"
+                              value={followUpQuestion}
+                              onChange={(e) =>
+                                setFollowUpQuestion(e.target.value)
+                              }
+                              placeholder="Ask a follow-up question..."
+                              className="flex-1 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              disabled={!tutorial || chatLoading}
+                            />
+                            <button
+                              type="submit"
+                              disabled={!tutorial || chatLoading}
+                              className={`px-6 py-3 bg-blue-600 text-white rounded-lg font-medium ${
+                                !tutorial || chatLoading
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : "hover:bg-blue-700"
                               }`}
                             >
-                              <div className="prose dark:prose-invert max-w-none">
-                                <ReactMarkdown
-                                  components={MarkdownComponents}
-                                  remarkPlugins={[remarkGfm]}
-                                  rehypePlugins={[rehypeRaw, rehypeSanitize]}
-                                >
-                                  {message.content}
-                                </ReactMarkdown>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                        {chatLoading && (
-                          <div className="flex justify-start">
-                            <div className="bg-gray-100 dark:bg-gray-700 rounded-lg px-4 py-2">
-                              <div className="flex space-x-2">
-                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100" />
-                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200" />
-                              </div>
-                            </div>
-                          </div>
-                        )}
+                              {chatLoading ? "Asking..." : "Ask"}
+                            </button>
+                          </form>
+                        </div>
                       </div>
-
-                      {/* Chat Input */}
-                      <form
-                        onSubmit={handleFollowUpQuestion}
-                        className="flex gap-4"
-                      >
-                        <input
-                          type="text"
-                          value={followUpQuestion}
-                          onChange={(e) => setFollowUpQuestion(e.target.value)}
-                          placeholder="Ask a follow-up question..."
-                          className="flex-1 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          disabled={!tutorial || chatLoading}
-                        />
-                        <button
-                          type="submit"
-                          disabled={!tutorial || chatLoading}
-                          className={`px-6 py-3 bg-blue-600 text-white rounded-lg font-medium ${
-                            !tutorial || chatLoading
-                              ? "opacity-50 cursor-not-allowed"
-                              : "hover:bg-blue-700"
-                          }`}
-                        >
-                          {chatLoading ? "Asking..." : "Ask"}
-                        </button>
-                      </form>
                     </div>
-                  </>
+                  </motion.div>
                 )
               )}
             </div>
