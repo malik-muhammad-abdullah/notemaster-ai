@@ -8,6 +8,7 @@ import type { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
+import { PdfExportButton } from "../components/PdfExport";
 
 // Custom components for markdown rendering
 const MarkdownComponents: Partial<Components> = {
@@ -573,32 +574,39 @@ export default function QuizGenerationPage() {
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                   Your Quiz
                 </h3>
-                <button
-                  onClick={handleCopy}
-                  className="flex items-center space-x-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 cursor-pointer"
-                >
-                  <span>{copied ? "Copied!" : "Copy to Clipboard"}</span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={handleCopy}
+                    className="flex items-center space-x-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 cursor-pointer"
                   >
-                    <rect
-                      x="9"
-                      y="9"
-                      width="13"
-                      height="13"
-                      rx="2"
-                      ry="2"
-                    ></rect>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                  </svg>
-                </button>
+                    <span>{copied ? "Copied!" : "Copy to Clipboard"}</span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect
+                        x="9"
+                        y="9"
+                        width="13"
+                        height="13"
+                        rx="2"
+                        ry="2"
+                      ></rect>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                  </button>
+                  <PdfExportButton
+                    content={quiz}
+                    title={`Quiz on ${topic}`}
+                    className="text-sm"
+                  />
+                </div>
               </div>
               <article className="prose dark:prose-invert max-w-none">
                 <ReactMarkdown
