@@ -6,6 +6,13 @@ import MainNavigation from "./components/MainNavigation";
 import { LoadingProvider } from "./components/LoadingProvider";
 import MainContentWrapper from "./components/MainContentWrapper";
 import NavigationEvents from "./components/NavigationEvents";
+import { startReminderService } from "@/lib/reminder-service";
+
+// Start the reminder service in development
+// In production, this should be handled by your deployment platform
+if (process.env.NODE_ENV === "development") {
+  startReminderService();
+}
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,9 +46,7 @@ export default function RootLayout({
               <NavigationEvents />
               <div className="flex-grow">
                 <main id="main-content" className="h-fulllll">
-                  <MainContentWrapper>
-                    {children}
-                  </MainContentWrapper>
+                  <MainContentWrapper>{children}</MainContentWrapper>
                 </main>
               </div>
             </div>
