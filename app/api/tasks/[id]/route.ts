@@ -23,14 +23,14 @@ export async function PUT(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const { id } = params;
+    const taskId = params.id;
     const { title, description, dueDate, status, priority, reminders } =
       await request.json();
 
     // Verify task exists and belongs to user
     const existingTask = await prisma.task.findFirst({
       where: {
-        id,
+        id: taskId,
         userId: user.id,
       },
     });
@@ -39,28 +39,38 @@ export async function PUT(
       return NextResponse.json({ error: "Task not found" }, { status: 404 });
     }
 
-    // Delete existing reminders and create new ones
+    // Delete existing reminders
     await prisma.taskReminder.deleteMany({
       where: {
-        taskId: id,
+        taskId,
       },
     });
 
+    // Create new reminders with proper date calculation
+    const dueDateObj = new Date(dueDate);
+    let reminderData = [];
+
+    if (reminders && reminders.length > 0) {
+      reminderData = reminders.map((reminder: { minutes: number }) => ({
+        sendAt: new Date(dueDateObj.getTime() - reminder.minutes * 60000),
+      }));
+    }
+
+    // Update task with new reminders
     const task = await prisma.task.update({
-      where: { id },
+      where: { id: taskId },
       data: {
         title,
         description,
-        dueDate: new Date(dueDate),
+        dueDate: dueDateObj,
         status,
         priority,
-        reminders: {
-          create: reminders.map((reminder: { minutes: number }) => ({
-            sendAt: new Date(
-              new Date(dueDate).getTime() - reminder.minutes * 60000
-            ),
-          })),
-        },
+        reminders:
+          reminderData.length > 0
+            ? {
+                create: reminderData,
+              }
+            : undefined,
       },
       include: {
         reminders: true,
@@ -97,12 +107,12 @@ export async function DELETE(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const { id } = params;
+    const taskId = params.id;
 
     // Verify task exists and belongs to user
     const task = await prisma.task.findFirst({
       where: {
-        id,
+        id: taskId,
         userId: user.id,
       },
     });
@@ -113,7 +123,7 @@ export async function DELETE(
 
     // Delete task (this will cascade delete reminders)
     await prisma.task.delete({
-      where: { id },
+      where: { id: taskId },
     });
 
     return NextResponse.json({ message: "Task deleted successfully" });

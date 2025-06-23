@@ -26,7 +26,7 @@ export default function MainNavigation() {
     if (pathname.startsWith("/real-time-text-tutoring")) return "Text Tutoring";
     if (pathname.startsWith("/file-upload")) return "File Upload";
     if (pathname.startsWith("/coding-assistant")) return "Coding Assistant";
-    if (pathname.startsWith("/tasks")) return "Tasks";
+    if (pathname.startsWith("/tasks")) return "Task Management";
     return null;
   };
 
@@ -180,92 +180,135 @@ export default function MainNavigation() {
                 </div>
               )}
             </div>
-            <div className="hidden md:block">
-              <div className="ml-4 flex items-center md:ml-6">
-                {status === "authenticated" && session?.user ? (
-                  <div className="relative" ref={dropdownRef}>
-                    <div
-                      className="flex items-center space-x-2 cursor-pointer rounded-full hover:bg-indigo-900/30 px-3 py-2 transition-all duration-300 ease-in-out group"
-                      onClick={() => setDropdownOpen(!dropdownOpen)}
+
+            <div className="hidden md:flex items-center space-x-4">
+              {/* Task Management Link */}
+              <AppLink
+                href="/tasks"
+                className={`group px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                  pathname.startsWith("/tasks")
+                    ? "bg-indigo-600/20 text-indigo-400 ring-1 ring-indigo-500/50"
+                    : "text-gray-300 hover:text-indigo-400 hover:bg-indigo-900/30"
+                }`}
+              >
+                <div className="flex items-center space-x-2">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className={`h-5 w-5 transition-transform duration-300 ${
+                      pathname.startsWith("/tasks")
+                        ? "text-indigo-400"
+                        : "text-gray-400 group-hover:text-indigo-400"
+                    } group-hover:scale-110`}
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <span className="relative">
+                    Task Management
+                    <span
+                      className={`absolute -bottom-1 left-0 w-full h-0.5 bg-indigo-500 transform origin-left transition-transform duration-300 ${
+                        pathname.startsWith("/tasks")
+                          ? "scale-x-100"
+                          : "scale-x-0"
+                      } group-hover:scale-x-100`}
+                    ></span>
+                  </span>
+                </div>
+              </AppLink>
+
+              {/* User Profile Section */}
+              {status === "authenticated" && session?.user ? (
+                <div className="relative" ref={dropdownRef}>
+                  <div
+                    className="flex items-center space-x-2 cursor-pointer rounded-full hover:bg-indigo-900/30 px-3 py-2 transition-all duration-300 ease-in-out group"
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                  >
+                    {session.user.image && (
+                      <div className="h-8 w-8 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-indigo-500/50 group-hover:ring-indigo-400 transition-all duration-300 shadow-lg shadow-indigo-500/20">
+                        <Image
+                          src={session.user.image}
+                          alt="User profile"
+                          width={32}
+                          height={32}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    )}
+                    <span className="text-sm font-medium text-gray-200 whitespace-nowrap">
+                      {session.user.name}
+                    </span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className={`h-4 w-4 text-gray-400 transition-transform duration-300 ${
+                        dropdownOpen ? "rotate-180" : ""
+                      }`}
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
                     >
-                      {session.user.image && (
-                        <div className="h-8 w-8 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-indigo-500/50 group-hover:ring-indigo-400 transition-all duration-300 shadow-lg shadow-indigo-500/20">
-                          <Image
-                            src={session.user.image}
-                            alt="User profile"
-                            width={32}
-                            height={32}
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-                      )}
-                      <span className="text-sm font-medium text-gray-200 whitespace-nowrap">
-                        {session.user.name}
-                      </span>
+                      <path
+                        fillRule="evenodd"
+                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+
+                  {/* Dropdown menu with transition */}
+                  <div
+                    className={`absolute right-0 top-full mt-2 min-w-[240px] bg-gray-900/95 backdrop-blur-xl border border-indigo-500/20 rounded-xl shadow-[0_8px_20px_-2px_rgba(79,70,229,0.2)] py-1 z-10 transition-all duration-300 ease-in-out transform origin-top-right ${
+                      dropdownOpen
+                        ? "opacity-100 scale-100 translate-y-0"
+                        : "opacity-0 scale-95 -translate-y-4 pointer-events-none"
+                    }`}
+                  >
+                    <div className="px-4 py-3 border-b border-indigo-500/20">
+                      <p className="text-sm text-gray-400">Signed in as</p>
+                      <p className="text-sm font-medium text-white break-words">
+                        {session.user.email}
+                      </p>
+                    </div>
+                    <AppLink
+                      href="/api/auth/signout"
+                      className="group flex items-center space-x-2 px-4 py-2 text-sm text-gray-300 hover:bg-indigo-900/30 hover:text-white transition-colors duration-200"
+                      onClick={() => setDropdownOpen(false)}
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className={`h-4 w-4 text-gray-400 transition-transform duration-300 ${dropdownOpen ? "rotate-180" : ""}`}
+                        className="h-4 w-4 mr-2 text-gray-400 group-hover:text-indigo-400 transition-colors duration-200"
                         viewBox="0 0 20 20"
                         fill="currentColor"
                       >
                         <path
                           fillRule="evenodd"
-                          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                          d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V7.414a1 1 0 00-.293-.707L11.414 2.414A1 1 0 0010.707 2H4a1 1 0 00-1 1zm9 5a1 1 0 00-1 1v6a1 1 0 002 0V9a1 1 0 00-1-1z"
                           clipRule="evenodd"
                         />
+                        <path d="M12.293 6.293a1 1 0 011.414 0l2 2a1 1 0 010 1.414l-2 2a1 1 0 01-1.414-1.414L13.586 9H7a1 1 0 010-2h6.586l-1.293-1.293a1 1 0 010-1.414z" />
                       </svg>
-                    </div>
-
-                    {/* Dropdown menu with transition */}
-                    <div
-                      className={`absolute right-0 top-full mt-2 min-w-[240px] bg-gray-900/95 backdrop-blur-xl border border-indigo-500/20 rounded-xl shadow-[0_8px_20px_-2px_rgba(79,70,229,0.2)] py-1 z-10 transition-all duration-300 ease-in-out transform origin-top-right ${
-                        dropdownOpen
-                          ? "opacity-100 scale-100 translate-y-0"
-                          : "opacity-0 scale-95 -translate-y-4 pointer-events-none"
-                      }`}
-                    >
-                      <div className="px-4 py-3 border-b border-indigo-500/20">
-                        <p className="text-sm text-gray-400">Signed in as</p>
-                        <p className="text-sm font-medium text-white break-words">
-                          {session.user.email}
-                        </p>
-                      </div>
-                      <AppLink
-                        href="/api/auth/signout"
-                        className="group flex items-center space-x-2 px-4 py-2 text-sm text-gray-300 hover:bg-indigo-900/30 hover:text-white transition-colors duration-200"
-                        onClick={() => setDropdownOpen(false)}
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4 mr-2 text-gray-400 group-hover:text-indigo-400 transition-colors duration-200"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V7.414a1 1 0 00-.293-.707L11.414 2.414A1 1 0 0010.707 2H4a1 1 0 00-1 1zm9 5a1 1 0 00-1 1v6a1 1 0 002 0V9a1 1 0 00-1-1z"
-                            clipRule="evenodd"
-                          />
-                          <path d="M12.293 6.293a1 1 0 011.414 0l2 2a1 1 0 010 1.414l-2 2a1 1 0 01-1.414-1.414L13.586 9H7a1 1 0 010-2h6.586l-1.293-1.293a1 1 0 010-1.414z" />
-                        </svg>
-                        <span>Sign Out</span>
-                      </AppLink>
-                    </div>
+                      <span>Sign Out</span>
+                    </AppLink>
                   </div>
-                ) : (
-                  <AppLink
-                    href="/api/auth/signin"
-                    className="relative group overflow-hidden px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-[0_10px_20px_-10px_rgba(120,119,198,0.8)]"
-                  >
-                    <span className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-indigo-700"></span>
-                    <span className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                    <span className="relative text-white font-semibold tracking-wide">
-                      Sign In
-                    </span>
-                  </AppLink>
-                )}
-              </div>
+                </div>
+              ) : (
+                <AppLink
+                  href="/api/auth/signin"
+                  className="relative group overflow-hidden px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-[0_10px_20px_-10px_rgba(120,119,198,0.8)]"
+                >
+                  <span className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-indigo-700"></span>
+                  <span className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                  <span className="relative text-white font-semibold tracking-wide">
+                    Sign In
+                  </span>
+                </AppLink>
+              )}
             </div>
+
+            {/* Mobile menu button */}
             <div className="-mr-2 flex md:hidden">
               {/* Mobile menu button */}
               <button

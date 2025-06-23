@@ -2,7 +2,11 @@
 import { useEffect, useState, ReactNode } from "react";
 import { useLoading } from "./LoadingProvider";
 
-export default function MainContentWrapper({ children }: { children: ReactNode }) {
+export default function MainContentWrapper({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const { isLoading, showLoadingOverlay } = useLoading();
   const [isVisible, setIsVisible] = useState(false);
 
@@ -19,10 +23,12 @@ export default function MainContentWrapper({ children }: { children: ReactNode }
 
   return (
     <div
-      className={`${isVisible ? 'page-reveal' : 'opacity-0'} will-change-opacity will-change-transform`}
-      style={{ animationPlayState: isVisible ? 'running' : 'paused' }}
+      className={`${
+        isVisible ? "page-reveal" : "opacity-0"
+      } will-change-opacity will-change-transform`}
+      style={{ animationPlayState: isVisible ? "running" : "paused" }}
     >
       {children}
     </div>
   );
-} 
+}
