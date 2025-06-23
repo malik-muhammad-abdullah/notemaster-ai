@@ -8,7 +8,6 @@ import type { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
-import { PdfExportButton } from "../components/PdfExport";
 
 // Custom components for markdown rendering
 const MarkdownComponents: Partial<Components> = {
@@ -204,27 +203,6 @@ const LoadingAnimation = () => (
     </div>
   </div>
 );
-
-// Add keyframes for the draw animation
-const style = document.createElement("style");
-style.textContent = `
-  @keyframes draw {
-    from {
-      stroke-dashoffset: 1000;
-    }
-    to {
-      stroke-dashoffset: 0;
-    }
-  }
-  .animate-draw {
-    stroke-dasharray: 1000;
-    stroke-dashoffset: 1000;
-    animation: draw 2s ease-in-out forwards infinite;
-  }
-`;
-if (typeof document !== "undefined") {
-  document.head.appendChild(style);
-}
 
 export default function TextTutoringPage() {
   const { data: session } = useSession();
@@ -597,18 +575,6 @@ export default function TextTutoringPage() {
                             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                           </svg>
                         </button>
-                        <PdfExportButton
-                          content={messages
-                            .map(
-                              (msg) =>
-                                `${msg.role === "user" ? "You" : "Tutor"}: ${
-                                  msg.content
-                                }`
-                            )
-                            .join("\n\n")}
-                          title={`Tutoring Session: ${topic}`}
-                          className="text-sm"
-                        />
                       </div>
                     </div>
                     <div className="prose dark:prose-invert max-w-none">
