@@ -20,16 +20,13 @@ export async function POST(request: Request) {
 
     if (!session?.user?.email) {
       console.log("Chat API: Unauthorized - no valid session");
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
-    console.log("Chat API: Request body received", { 
-      hasMessage: !!body.message, 
-      hasConversationId: !!body.conversationId
+    console.log("Chat API: Request body received", {
+      hasMessage: !!body.message,
+      hasConversationId: !!body.conversationId,
     });
     const { message, conversationId } = body;
 
@@ -53,10 +50,7 @@ export async function POST(request: Request) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Verify conversation exists and belongs to user
@@ -64,6 +58,7 @@ export async function POST(request: Request) {
       where: {
         id: conversationId,
         userId: user.id,
+        type: "GENERAL",
       },
       include: {
         messages: {
@@ -91,18 +86,24 @@ export async function POST(request: Request) {
     });
 
     // Get previous messages for context
-    const chatHistory = conversation.messages.map(msg => {
-      return `${msg.role === "user" ? "Human" : "Assistant"}: ${msg.content}`;
-    }).join("\n");
+    const chatHistory = conversation.messages
+      .map((msg) => {
+        return `${msg.role === "user" ? "Human" : "Assistant"}: ${msg.content}`;
+      })
+      .join("\n");
 
     // Query vector store for relevant documents
     const vectorSearchResults = await queryVectorStore(message, user.id, 5);
-    const relevantDocs = vectorSearchResults.success && vectorSearchResults.results ? 
-      vectorSearchResults.results : [];
+    const relevantDocs =
+      vectorSearchResults.success && vectorSearchResults.results
+        ? vectorSearchResults.results
+        : [];
 
     // Format documents as string
-    const formattedDocs = relevantDocs.length > 0 ? 
-      formatDocumentsAsString(relevantDocs) : "No relevant documents found.";
+    const formattedDocs =
+      relevantDocs.length > 0
+        ? formatDocumentsAsString(relevantDocs)
+        : "No relevant documents found.";
 
     // Initialize language model
     const llm = new ChatOpenAI({
@@ -160,8 +161,11 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Chat API error:", error);
     return NextResponse.json(
-      { error: "Failed to process message", details: error instanceof Error ? error.message : String(error) },
+      {
+        error: "Failed to process message",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
-} 
+}
